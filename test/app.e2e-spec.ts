@@ -3,6 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { UsersService } from './../src/users';
+import { setupValidation } from './../src/shared/setup-validation';
 
 const fakeUser = {
   name: 'test',
@@ -19,6 +20,7 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    setupValidation(app);
     userService = app.get(UsersService);
     await app.init();
   });
@@ -41,9 +43,12 @@ describe('AppController (e2e)', () => {
     .expect(201);
   });
 
-  it('/api/auth/login POST should return statusCode 404 if user does not exists', () => {
+  it('/api/auth/login POST should return statusCode 401 if user does not exists', () => {
     return request(app.getHttpServer()).post('/api/auth/login')
-    .send(fakeUser)
+    .send({
+      username: fakeUser.name,
+      password: fakeUser.password,
+    })
     .expect(401);
   });
 

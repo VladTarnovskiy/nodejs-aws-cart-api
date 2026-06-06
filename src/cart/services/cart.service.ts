@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PutCartPayload } from 'src/order/type';
+import { UpdateCartDto } from '../dto';
 
 import { Cart, CartItem, CartRow } from '../models';
 import { CartRepository } from '../repositories';
@@ -36,7 +36,7 @@ export class CartService {
     return this.createByUserId(userId);
   }
 
-  async updateByUserId(userId: string, payload: PutCartPayload): Promise<Cart> {
+  async updateByUserId(userId: string, payload: UpdateCartDto): Promise<Cart> {
     const cart = await this.findOrCreateByUserId(userId);
 
     if (payload.count === 0) {

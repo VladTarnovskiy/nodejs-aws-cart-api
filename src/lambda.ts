@@ -8,6 +8,7 @@ import express from 'express';
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
+import { setupValidation } from './shared/setup-validation';
 
 let cachedServer: Handler;
 
@@ -23,6 +24,7 @@ async function bootstrap() {
       origin: (req, callback) => callback(null, true),
     });
     nestApp.use(helmet());
+    setupValidation(nestApp);
 
     await nestApp.init();
 

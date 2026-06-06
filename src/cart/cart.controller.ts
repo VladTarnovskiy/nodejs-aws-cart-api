@@ -12,11 +12,12 @@ import {
 } from '@nestjs/common';
 import { BasicAuthGuard } from '../auth';
 import { Order, OrderService } from '../order';
+import { CheckoutOrderDto } from '../order/dto';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
 import { CartItem } from './models';
-import { CreateOrderDto, PutCartPayload } from 'src/order/type';
+import { UpdateCartDto } from './dto';
 
 @Controller('api/profile/cart')
 export class CartController {
@@ -39,7 +40,7 @@ export class CartController {
   @Put()
   async updateUserCart(
     @Req() req: AppRequest,
-    @Body() body: PutCartPayload,
+    @Body() body: UpdateCartDto,
   ): Promise<CartItem[]> {
     const cart = await this.cartService.updateByUserId(
       getUserIdFromRequest(req),
@@ -58,7 +59,7 @@ export class CartController {
 
   @UseGuards(BasicAuthGuard)
   @Put('order')
-  async checkout(@Req() req: AppRequest, @Body() body: CreateOrderDto) {
+  async checkout(@Req() req: AppRequest, @Body() body: CheckoutOrderDto) {
     const userId = getUserIdFromRequest(req);
     const cart = await this.cartService.findByUserId(userId);
 

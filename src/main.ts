@@ -4,6 +4,7 @@ import helmet from 'helmet';
 
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
+import { setupValidation } from './shared/setup-validation';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,7 @@ async function bootstrap() {
     origin: (req, callback) => callback(null, true),
   });
   app.use(helmet());
+  setupValidation(app);
 
   await app.listen(port, () => {
     console.log('App is running on %s port', port);
