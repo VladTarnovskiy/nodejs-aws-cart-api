@@ -2,6 +2,8 @@
 /dist
 /node_modules
 /cdk/cdk.out
+/.cdk-lambda-staging
+/.lambda-package
 *.tsbuildinfo
 
 # Logs
