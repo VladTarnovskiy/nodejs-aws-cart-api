@@ -9,18 +9,15 @@ export class CartApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const cartApiLambda = new lambda.DockerImageFunction(
-      this,
-      'CartApiLambda',
-      {
-        code: lambda.DockerImageCode.fromImageAsset(
-          path.join(__dirname, '../..'),
-          { cmd: ['src/lambda.handler'] },
-        ),
-        memorySize: 512,
-        timeout: cdk.Duration.seconds(30),
-      },
-    );
+    const cartApiLambda = new lambda.Function(this, 'CartApiLambda', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'src/lambda.handler',
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, '../../.lambda-package'),
+      ),
+      memorySize: 512,
+      timeout: cdk.Duration.seconds(30),
+    });
 
     const httpApi = new apigwv2.HttpApi(this, 'CartHttpApi', {
       apiName: 'cart-api',

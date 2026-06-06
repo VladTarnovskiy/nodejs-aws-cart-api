@@ -23,7 +23,8 @@
     "cdk:synth": "cd cdk && cdk synth",
     "cdk:deploy": "cd cdk && cdk deploy",
     "cdk:destroy": "cd cdk && cdk destroy",
-    "deploy": "npm run cdk:deploy"
+    "build:lambda": "node scripts/build-lambda-package.mjs",
+    "deploy": "npm run build:lambda && npm run cdk:deploy"
   },
   "dependencies": {
     "@codegenie/serverless-express": "^4.17.0",
@@ -58,7 +59,6 @@
     "aws-cdk": "^2.170.0",
     "aws-cdk-lib": "^2.170.0",
     "constructs": "^10.4.2",
-    "esbuild": "^0.28.0",
     "eslint": "8.43.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
