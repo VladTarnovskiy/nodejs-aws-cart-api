@@ -81,3 +81,139 @@ if command failed make script executable
 chmod +x ./get-token.sh
 ```
 
+## Deploy to AWS (CDK)
+
+### Prerequisites
+
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) configured (`aws configure`)
+- Node.js 20+
+- AWS account bootstrapped for CDK (once per account/region)
+
+### Bootstrap CDK (first time only)
+
+```bash
+cd cdk
+npx cdk bootstrap
+cd ..
+```
+
+### Deploy Lambda + API Gateway
+
+```bash
+npm run deploy
+```
+
+This command:
+
+1. Builds the NestJS app (`nest build`)
+2. Prepares a Lambda package (`.lambda-package/`)
+3. Deploys the CDK stack (`CartApiStack`)
+
+After deploy, copy the output URL:
+
+```
+CartApiStack.CartApiUrl = https://xxxxxxxx.execute-api.us-east-1.amazonaws.com/
+```
+
+Use this URL instead of `http://localhost:4000` for API requests.
+
+### Other CDK commands
+
+```bash
+npm run cdk:synth    # validate CloudFormation template
+npm run cdk:destroy  # remove deployed stack
+```
+
+### Test deployed API
+
+```bash
+# health check
+curl https://YOUR_API_URL/
+
+# register
+curl -X POST https://YOUR_API_URL/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"yourGithubLogin","password":"TEST_PASSWORD"}'
+
+# login
+curl -X POST https://YOUR_API_URL/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"yourGithubLogin","password":"TEST_PASSWORD"}'
+```
+
+## PostgreSQL (RDS) — Task 8.2
+
+### 1. Create RDS instance (AWS Console)
+
+1. Open [AWS RDS Console](https://console.aws.amazon.com/rds/)
+2. **Create database**
+3. Engine: **PostgreSQL**
+4. Template: **Free tier** (or default for learning)
+5. Set master username and password
+6. Enable **Public access** (for connection from DBeaver/pgAdmin on your machine)
+7. Create or select a security group that allows inbound **TCP 5432** from your IP
+8. Create database
+
+Save these values after creation:
+
+- **Endpoint** (host), e.g. `cart-db.xxxxx.us-east-1.rds.amazonaws.com`
+- **Port** (default `5432`)
+- **Master username**
+- **Master password**
+- **Database name** (default `postgres`)
+
+### 2. Connect to RDS
+
+#### Option A: DBeaver / DataGrip / pgAdmin
+
+Create a new PostgreSQL connection:
+
+| Field    | Value              |
+|----------|--------------------|
+| Host     | RDS endpoint       |
+| Port     | 5432               |
+| Database | postgres           |
+| Username | master username    |
+| Password | master password    |
+
+If connection fails, check:
+
+- RDS instance status is **Available**
+- Security group allows your IP on port **5432**
+- **Public access** is enabled
+
+#### Option B: psql (CLI)
+
+```bash
+psql -h YOUR_RDS_ENDPOINT -p 5432 -U postgres -d postgres
+```
+
+### 3. Create tables and seed data
+
+Run the SQL script from this repository:
+
+**In DBeaver / pgAdmin:** open `db/init.sql`, select all, execute.
+
+**Via psql:**
+
+```bash
+psql -h YOUR_RDS_ENDPOINT -p 5432 -U postgres -d postgres -f db/init.sql
+```
+
+The script creates:
+
+- `carts`, `cart_items` (required for Task 8.2)
+- `users`, `orders` (optional tasks)
+- test data (sample user, cart, cart items, order)
+
+You can run `init.sql` multiple times — duplicate rows are skipped (`ON CONFLICT DO NOTHING`).
+
+### 4. Verify tables
+
+```sql
+SELECT * FROM carts;
+SELECT * FROM cart_items;
+SELECT * FROM users;
+SELECT * FROM orders;
+```
+
