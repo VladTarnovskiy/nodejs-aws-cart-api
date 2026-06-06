@@ -22,13 +22,12 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
   },
-  // // Uncomment this and update according you needs
-  // overrides: [{
-  //   files: [
-  //     "cdk/**/*.ts"
-  //   ],
-  //   parserOptions: {
-  //     "project": "cdk/tsconfig.json"
-  //   },
-  // }],
+  overrides: [{
+    files: [
+      "cdk/**/*.ts"
+    ],
+    parserOptions: {
+      "project": "cdk/tsconfig.json"
+    },
+  }],
 };
