@@ -17,6 +17,14 @@ export class CartApiStack extends cdk.Stack {
       ),
       memorySize: 512,
       timeout: cdk.Duration.seconds(30),
+      environment: {
+        DB_HOST: process.env.DB_HOST ?? '',
+        DB_PORT: process.env.DB_PORT ?? '5432',
+        DB_USER: process.env.DB_USER ?? '',
+        DB_PASSWORD: process.env.DB_PASSWORD ?? '',
+        DB_NAME: process.env.DB_NAME ?? 'postgres',
+        DB_SSL: process.env.DB_SSL ?? 'true',
+      },
     });
 
     const httpApi = new apigwv2.HttpApi(this, 'CartHttpApi', {

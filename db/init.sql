@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS cart_items (
   cart_id uuid NOT NULL REFERENCES carts (id) ON DELETE CASCADE,
   product_id uuid NOT NULL,
   count integer NOT NULL CHECK (count > 0),
+  product jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (cart_id, product_id)
 );
 
@@ -59,17 +60,19 @@ VALUES (
 )
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO cart_items (cart_id, product_id, count)
+INSERT INTO cart_items (cart_id, product_id, count, product)
 VALUES
   (
     '22222222-2222-2222-2222-222222222222',
     '33333333-3333-3333-3333-333333333333',
-    2
+    2,
+    '{"id":"33333333-3333-3333-3333-333333333333","title":"Product A","description":"Test product A","price":10}'::jsonb
   ),
   (
     '22222222-2222-2222-2222-222222222222',
     '44444444-4444-4444-4444-444444444444',
-    1
+    1,
+    '{"id":"44444444-4444-4444-4444-444444444444","title":"Product B","description":"Test product B","price":20}'::jsonb
   )
 ON CONFLICT (cart_id, product_id) DO NOTHING;
 

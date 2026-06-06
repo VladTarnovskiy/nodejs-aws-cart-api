@@ -217,3 +217,59 @@ SELECT * FROM users;
 SELECT * FROM orders;
 ```
 
+## PostgreSQL integration (Task 8.3)
+
+The app uses the `pg` library to store users, carts, cart items, and orders in RDS.
+
+### Local development
+
+Copy env variables and set RDS credentials:
+
+```bash
+cp env.example .env
+```
+
+Required variables:
+
+| Variable | Description |
+|----------|-------------|
+| `DB_HOST` | RDS endpoint |
+| `DB_PORT` | `5432` |
+| `DB_USER` | master username |
+| `DB_PASSWORD` | master password |
+| `DB_NAME` | database name (`postgres`) |
+| `DB_SSL` | `true` for RDS |
+
+Run locally:
+
+```bash
+npm run start:dev
+```
+
+### Deploy Lambda with database credentials
+
+Set DB env variables **before** deploy (bash):
+
+```bash
+export DB_HOST=your-rds-endpoint.us-east-1.rds.amazonaws.com
+export DB_PORT=5432
+export DB_USER=postgres
+export DB_PASSWORD=your_password
+export DB_NAME=postgres
+export DB_SSL=true
+
+npm run deploy
+```
+
+CDK passes these values to Lambda environment variables.
+
+### RDS security for Lambda
+
+Lambda must reach RDS:
+
+1. RDS security group: allow inbound **5432** from Lambda security group or VPC CIDR
+2. If RDS is public: allow Lambda egress to RDS (Lambda outside VPC uses public RDS endpoint)
+3. For production: place Lambda in the same VPC as RDS
+
+After deploy, register/login and cart operations use PostgreSQL instead of in-memory storage.
+

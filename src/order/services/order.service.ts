@@ -1,50 +1,60 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
-import { Order } from '../models';
+
+import { Order, OrderRow } from '../models';
+import { OrdersRepository } from '../repositories';
 import { CreateOrderPayload, OrderStatus } from '../type';
 
 @Injectable()
 export class OrderService {
-  private orders: Record<string, Order> = {};
+  constructor(private readonly ordersRepository: OrdersRepository) {}
 
-  getAll() {
-    return Object.values(this.orders);
+  async getAll(): Promise<Order[]> {
+    const rows = await this.ordersRepository.findAll();
+
+    return rows.map((row) => this.mapRow(row));
   }
 
-  findById(orderId: string): Order {
-    return this.orders[orderId];
+  async findById(orderId: string): Promise<Order | undefined> {
+    const row = await this.ordersRepository.findById(orderId);
+
+    return row ? this.mapRow(row) : undefined;
   }
 
-  create(data: CreateOrderPayload) {
-    const id = randomUUID() as string;
-    const order: Order = {
-      id,
-      ...data,
-      statusHistory: [
-        {
-          comment: '',
-          status: OrderStatus.Open,
-          timestamp: Date.now(),
-        },
-      ],
-    };
+  async create(data: CreateOrderPayload): Promise<Order> {
+    const row = await this.ordersRepository.create(data);
 
-    this.orders[id] = order;
-
-    return order;
+    return this.mapRow(row);
   }
 
-  // TODO add  type
-  update(orderId: string, data: Order) {
-    const order = this.findById(orderId);
+  async update(orderId: string, data: Order): Promise<void> {
+    const order = await this.findById(orderId);
 
     if (!order) {
       throw new Error('Order does not exist.');
     }
 
-    this.orders[orderId] = {
-      ...data,
-      id: orderId,
+    await this.ordersRepository.update(orderId, data);
+  }
+
+  private mapRow(row: OrderRow): Order {
+    return {
+      id: row.id,
+      userId: row.user_id,
+      cartId: row.cart_id,
+      items: row.payment?.items ?? [],
+      address: row.delivery ?? {
+        address: '',
+        firstName: '',
+        lastName: '',
+        comment: row.comments ?? '',
+      },
+      statusHistory: [
+        {
+          status: (row.status as OrderStatus.Open) ?? OrderStatus.Open,
+          timestamp: Date.now(),
+          comment: row.comments ?? '',
+        },
+      ],
     };
   }
 }

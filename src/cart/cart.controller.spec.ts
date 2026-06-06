@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { mockDatabaseServiceProvider } from '../database';
 import { CartController } from './cart.controller';
-import { OrderModule } from '../order/order.module';
+import { CartRepository } from './repositories';
 import { CartService } from './services';
+import { OrdersRepository } from '../order/repositories';
+import { OrderService } from '../order/services';
 
 describe('CartController', () => {
   let controller: CartController;
@@ -9,8 +12,13 @@ describe('CartController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CartController],
-      providers: [CartService],
-      imports: [OrderModule],
+      providers: [
+        CartService,
+        CartRepository,
+        OrderService,
+        OrdersRepository,
+        mockDatabaseServiceProvider,
+      ],
     }).compile();
 
     controller = module.get<CartController>(CartController);
