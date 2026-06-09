@@ -258,20 +258,15 @@ npm run start:dev
 
 ### Deploy Lambda with database credentials
 
-Set DB env variables **before** deploy (bash):
+Fill `DB_*` variables in `.env` (same file as for local dev), then deploy:
 
 ```bash
-export DB_HOST=your-rds-endpoint.us-east-1.rds.amazonaws.com
-export DB_PORT=5432
-export DB_USER=postgres
-export DB_PASSWORD=your_password
-export DB_NAME=postgres
-export DB_SSL=true
-
 npm run deploy
 ```
 
-CDK passes these values to Lambda environment variables.
+CDK reads `.env` from the project root and passes `DB_*` values to Lambda environment variables.
+
+You can still override via shell `export DB_HOST=...` before deploy if needed.
 
 ### RDS security for Lambda
 

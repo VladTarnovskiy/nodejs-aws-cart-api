@@ -8,10 +8,25 @@ import { CreateOrderPayload, OrderStatus } from '../type';
 export class OrderService {
   constructor(private readonly ordersRepository: OrdersRepository) {}
 
+  async getByUserId(userId: string): Promise<Order[]> {
+    const rows = await this.ordersRepository.findAllByUserId(userId);
+
+    return rows.map((row) => this.mapRow(row));
+  }
+
   async getAll(): Promise<Order[]> {
     const rows = await this.ordersRepository.findAll();
 
     return rows.map((row) => this.mapRow(row));
+  }
+
+  async findByIdForUser(
+    orderId: string,
+    userId: string,
+  ): Promise<Order | undefined> {
+    const row = await this.ordersRepository.findByIdForUser(orderId, userId);
+
+    return row ? this.mapRow(row) : undefined;
   }
 
   async findById(orderId: string): Promise<Order | undefined> {

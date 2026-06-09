@@ -97,6 +97,10 @@ export class CartController {
       throw new BadRequestException('Cart is empty');
     }
 
+    if (cart.user_id !== userId) {
+      throw new BadRequestException('Cart does not belong to the current user');
+    }
+
     const { id: cartId, items } = cart;
     const total = calculateCartTotal(items);
     const order = await this.orderService.create({
@@ -120,10 +124,10 @@ export class CartController {
   @UseGuards(BasicAuthGuard)
   @Get('order')
   @ApiTags('orders')
-  @ApiOperation({ summary: 'Get all orders' })
+  @ApiOperation({ summary: 'Get current user orders' })
   @ApiResponse({ status: 200, type: [OrderResponseDto] })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getOrder() {
-    return this.orderService.getAll();
+  async getOrder(@Req() req: AppRequest) {
+    return this.orderService.getByUserId(getUserIdFromRequest(req));
   }
 }

@@ -1,4 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/services/users.service';
 import { User } from '../users/models';
@@ -33,11 +36,11 @@ export class AuthService {
   ): Promise<User | undefined> {
     const user = await this.usersService.findOne(name);
 
-    if (user) {
-      return user;
+    if (!user || user.password !== password) {
+      return undefined;
     }
 
-    return this.usersService.createOne({ name, password });
+    return user;
   }
 
   login(user: User, type: 'jwt' | 'basic' | 'default'): TokenResponse {

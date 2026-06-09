@@ -16,6 +16,32 @@ export class OrdersRepository {
     return result.rows;
   }
 
+  async findAllByUserId(userId: string): Promise<OrderRow[]> {
+    const result = await this.databaseService.query<OrderRow>(
+      `SELECT id, user_id, cart_id, payment, delivery, comments, status, total
+       FROM orders
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [userId],
+    );
+
+    return result.rows;
+  }
+
+  async findByIdForUser(
+    orderId: string,
+    userId: string,
+  ): Promise<OrderRow | undefined> {
+    const result = await this.databaseService.query<OrderRow>(
+      `SELECT id, user_id, cart_id, payment, delivery, comments, status, total
+       FROM orders
+       WHERE id = $1 AND user_id = $2`,
+      [orderId, userId],
+    );
+
+    return result.rows[0];
+  }
+
   async findById(orderId: string): Promise<OrderRow | undefined> {
     const result = await this.databaseService.query<OrderRow>(
       'SELECT id, user_id, cart_id, payment, delivery, comments, status, total FROM orders WHERE id = $1',
