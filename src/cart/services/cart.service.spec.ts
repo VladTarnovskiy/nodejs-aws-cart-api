@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { mockDatabaseServiceProvider } from '../../database';
+import { mockDatabaseServiceProvider } from '../../database/mock-database.service';
 import { CartRepository } from '../repositories';
 import { CartService } from './cart.service';
 

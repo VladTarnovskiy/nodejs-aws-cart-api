@@ -9,6 +9,7 @@ import helmet from 'helmet';
 
 import { AppModule } from './app.module';
 import { setupValidation } from './shared/setup-validation';
+import { setupSwagger } from './shared/setup-swagger';
 
 let cachedServer: Handler;
 
@@ -23,8 +24,13 @@ async function bootstrap() {
     nestApp.enableCors({
       origin: (req, callback) => callback(null, true),
     });
-    nestApp.use(helmet());
+    nestApp.use(
+      helmet({
+        contentSecurityPolicy: false,
+      }),
+    );
     setupValidation(nestApp);
+    setupSwagger(nestApp);
 
     await nestApp.init();
 

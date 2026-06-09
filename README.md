@@ -8,6 +8,16 @@ npm install
 
 
 
+## API documentation (Swagger)
+
+After starting the app, open:
+
+```
+http://localhost:4000/api/docs
+```
+
+Swagger describes all endpoints: health check, auth, profile, cart, and orders. Protected routes use **Basic** auth (`Authorization: Basic <token from login>`).
+
 ## Running the app
 
 ```bash
