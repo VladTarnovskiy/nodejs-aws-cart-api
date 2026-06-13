@@ -70,6 +70,38 @@ export class OrdersRepository {
     return result.rows[0];
   }
 
+  async checkout(data: CreateOrderPayload): Promise<OrderRow> {
+    return this.databaseService.withTransaction(async (query) => {
+      const orderResult = await query<OrderRow>(
+        `INSERT INTO orders (user_id, cart_id, payment, delivery, comments, status, total)
+         VALUES ($1, $2, $3::jsonb, $4::jsonb, $5, $6, $7)
+         RETURNING id, user_id, cart_id, payment, delivery, comments, status, total`,
+        [
+          data.userId,
+          data.cartId,
+          JSON.stringify({ items: data.items }),
+          JSON.stringify(data.address),
+          data.address.comment ?? '',
+          OrderStatus.Open,
+          data.total,
+        ],
+      );
+
+      const cartResult = await query(
+        `UPDATE carts
+         SET status = 'ORDERED', updated_at = now()
+         WHERE id = $1 AND user_id = $2 AND status = 'OPEN'`,
+        [data.cartId, data.userId],
+      );
+
+      if (cartResult.rowCount === 0) {
+        throw new Error('Cart is not available for checkout');
+      }
+
+      return orderResult.rows[0];
+    });
+  }
+
   async update(orderId: string, data: Order): Promise<void> {
     await this.databaseService.query(
       `UPDATE orders

@@ -84,7 +84,11 @@ export class CartController {
   @UseGuards(BasicAuthGuard)
   @Put('order')
   @ApiTags('orders')
-  @ApiOperation({ summary: 'Checkout cart and create order' })
+  @ApiOperation({
+    summary: 'Checkout cart and create order',
+    description:
+      'Creates an order and marks the cart as ORDERED in a single database transaction',
+  })
   @ApiBody({ type: CheckoutOrderDto })
   @ApiResponse({ status: 200, type: CheckoutResponseDto })
   @ApiResponse({ status: 400, description: 'Cart is empty' })
@@ -103,7 +107,7 @@ export class CartController {
 
     const { id: cartId, items } = cart;
     const total = calculateCartTotal(items);
-    const order = await this.orderService.create({
+    const order = await this.orderService.checkout({
       userId,
       cartId,
       items: items.map(({ product, count }) => ({
@@ -113,8 +117,6 @@ export class CartController {
       address: body.address,
       total,
     });
-
-    await this.cartService.markAsOrdered(cartId);
 
     return {
       order,

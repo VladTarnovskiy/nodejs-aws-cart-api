@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { Order, OrderRow } from '../models';
 import { OrdersRepository } from '../repositories';
@@ -39,6 +39,23 @@ export class OrderService {
     const row = await this.ordersRepository.create(data);
 
     return this.mapRow(row);
+  }
+
+  async checkout(data: CreateOrderPayload): Promise<Order> {
+    try {
+      const row = await this.ordersRepository.checkout(data);
+
+      return this.mapRow(row);
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === 'Cart is not available for checkout'
+      ) {
+        throw new BadRequestException(error.message);
+      }
+
+      throw error;
+    }
   }
 
   async update(orderId: string, data: Order): Promise<void> {
