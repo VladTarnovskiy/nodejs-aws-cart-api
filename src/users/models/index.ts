@@ -4,3 +4,9 @@ export interface User {
   email?: string;
   password: string;
 }
+
+export interface UserRow {
+  id: string;
+  name: string;
+  password: string;
+}

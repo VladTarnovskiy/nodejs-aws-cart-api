@@ -4,6 +4,8 @@ import helmet from 'helmet';
 
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
+import { setupValidation } from './shared/setup-validation';
+import { setupSwagger } from './shared/setup-swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,7 +17,13 @@ async function bootstrap() {
   app.enableCors({
     origin: (req, callback) => callback(null, true),
   });
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    }),
+  );
+  setupValidation(app);
+  setupSwagger(app);
 
   await app.listen(port, () => {
     console.log('App is running on %s port', port);

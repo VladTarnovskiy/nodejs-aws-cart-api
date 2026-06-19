@@ -1,8 +1,12 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/services/users.service';
 import { User } from '../users/models';
-// import { contentSecurityPolicy } from 'helmet';
+import { RegisterUserDto } from '../users/dto';
+
 type TokenResponse = {
   token_type: string;
   access_token: string;
@@ -15,25 +19,28 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  register(payload: User) {
-    const user = this.usersService.findOne(payload.name);
+  async register(payload: RegisterUserDto) {
+    const user = await this.usersService.findOne(payload.name);
 
     if (user) {
       throw new BadRequestException('User with such name already exists');
     }
 
-    const { id: userId } = this.usersService.createOne(payload);
+    const { id: userId } = await this.usersService.createOne(payload);
     return { userId };
   }
 
-  validateUser(name: string, password: string): User {
-    const user = this.usersService.findOne(name);
+  async validateUser(
+    name: string,
+    password: string,
+  ): Promise<User | undefined> {
+    const user = await this.usersService.findOne(name);
 
-    if (user) {
-      return user;
+    if (!user || user.password !== password) {
+      return undefined;
     }
 
-    return this.usersService.createOne({ name, password });
+    return user;
   }
 
   login(user: User, type: 'jwt' | 'basic' | 'default'): TokenResponse {
@@ -57,9 +64,6 @@ export class AuthService {
   }
 
   loginBasic(user: User) {
-    // const payload = { username: user.name, sub: user.id };
-    console.log(user);
-
     function encodeUserToken(user: User) {
       const { name, password } = user;
       const buf = Buffer.from([name, password].join(':'), 'utf8');
